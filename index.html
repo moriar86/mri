@@ -56,44 +56,44 @@ for (let key in imageSources) {
 
 function startGame() {
   const groundY = canvas.height - unit * 5;
-  let marli = {
-    x: unit * 5,
-    y: groundY - unit * 7,
-    width: unit * 5,
-    height: unit * 7,
-    dy: 0,
-    gravity: 0.6 * scale,
-    jumpPower: -12 * scale,
-    isJumping: false,
-    speed: 5 * scale,
-    lives: 3
-  };
+ let marli = {
+  x: unit * 5,
+  y: groundY - unit * 11.2,
+  width: unit * 8,
+  height: unit * 11.2,
+  dy: 0,
+  gravity: 0.6 * scale,
+  jumpPower: -12 * scale,
+  isJumping: false,
+  speed: 5 * scale,
+  lives: 3
+};
 
   const enemies = [];
   const foods = [];
   const foodSprites = [images.avocado, images.burrito, images.milkshake];
 
-  function spawnEnemy() {
-    enemies.push({
-      x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 6,
-      width: unit * 5,
-      height: unit * 6,
-      speed: 5 * scale,
-      canHit: true,
-      active: true
-    });
-  }
+function spawnEnemy() {
+  enemies.push({
+    x: canvas.width + Math.random() * 300,
+    y: groundY - unit * 9.6,
+    width: unit * 8,
+    height: unit * 9.6,
+    speed: 5 * scale,
+    canHit: true,
+    active: true
+  });
+}
 
-  function spawnFood() {
-    foods.push({
-      x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 4,
-      width: unit * 4,
-      height: unit * 4,
-      sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
-    });
-  }
+function spawnFood() {
+  foods.push({
+    x: canvas.width + Math.random() * 300,
+    y: groundY - unit * 6.4,
+    width: unit * 6.4,
+    height: unit * 6.4,
+    sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
+  });
+}
 
   document.addEventListener("touchstart", () => {
     if (!marli.isJumping) {
