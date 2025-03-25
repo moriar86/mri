@@ -27,16 +27,15 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Responsive Größen
-const scale = canvas.width / 400; // Basisskalierung für kleinere Screens
-const unit = scale * 10;
+// Einheit: 1% der Bildschirmhöhe
+const unit = canvas.height / 100;
 
-// Asset-Pfade
+// Bildquellen
 const imageSources = {
   marli: "marli.png",
   knight: "knight.png",
   heart: "heart.png",
-  avocado: "Avocado.png",
+  avocado: "avocado.png",
   burrito: "burrito.png",
   milkshake: "milkshake.png"
 };
@@ -56,44 +55,45 @@ for (let key in imageSources) {
 
 function startGame() {
   const groundY = canvas.height - unit * 5;
- let marli = {
-  x: unit * 5,
-  y: groundY - unit * 11.2,
-  width: unit * 8,
-  height: unit * 11.2,
-  dy: 0,
-  gravity: 0.6 * scale,
-  jumpPower: -12 * scale,
-  isJumping: false,
-  speed: 5 * scale,
-  lives: 3
-};
+
+  let marli = {
+    x: unit * 5,
+    y: groundY - unit * 11,
+    width: unit * 8,
+    height: unit * 11,
+    dy: 0,
+    gravity: 0.6,
+    jumpPower: -12,
+    isJumping: false,
+    speed: 5,
+    lives: 3
+  };
 
   const enemies = [];
   const foods = [];
   const foodSprites = [images.avocado, images.burrito, images.milkshake];
 
-function spawnEnemy() {
-  enemies.push({
-    x: canvas.width + Math.random() * 300,
-    y: groundY - unit * 9.6,
-    width: unit * 8,
-    height: unit * 9.6,
-    speed: 5 * scale,
-    canHit: true,
-    active: true
-  });
-}
+  function spawnEnemy() {
+    enemies.push({
+      x: canvas.width + Math.random() * 300,
+      y: groundY - unit * 9,
+      width: unit * 7,
+      height: unit * 9,
+      speed: 5,
+      canHit: true,
+      active: true
+    });
+  }
 
-function spawnFood() {
-  foods.push({
-    x: canvas.width + Math.random() * 300,
-    y: groundY - unit * 6.4,
-    width: unit * 6.4,
-    height: unit * 6.4,
-    sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
-  });
-}
+  function spawnFood() {
+    foods.push({
+      x: canvas.width + Math.random() * 300,
+      y: groundY - unit * 5.5,
+      width: unit * 5.5,
+      height: unit * 5.5,
+      sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
+    });
+  }
 
   document.addEventListener("touchstart", () => {
     if (!marli.isJumping) {
@@ -155,9 +155,9 @@ function spawnFood() {
     });
 
     if (Math.random() < 0.01) spawnEnemy();
-    if (Math.random() < 0.006) spawnFood();
+    if (Math.random() < 0.005) spawnFood();
 
-    if (marli.speed < 12 * scale) marli.speed += 0.0005;
+    if (marli.speed < 12) marli.speed += 0.0005;
   }
 
   function draw() {
@@ -177,15 +177,14 @@ function spawnFood() {
       ctx.drawImage(food.sprite, food.x, food.y, food.width, food.height);
     });
 
-    // Herz-Anzeige
     for (let i = 0; i < marli.lives; i++) {
-      ctx.drawImage(images.heart, unit * 2 + i * (unit * 4), unit * 2, unit * 3, unit * 3);
+      ctx.drawImage(images.heart, unit * 1 + i * (unit * 4), unit * 1, unit * 3, unit * 3);
     }
   }
 
   function resetGame() {
     marli.lives = 3;
-    marli.speed = 5 * scale;
+    marli.speed = 5;
     enemies.length = 0;
     foods.length = 0;
   }
