@@ -21,162 +21,180 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <div id="errorMessage"></div>
+<canvas id="gameCanvas"></canvas>
+<div id="errorMessage"></div>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-        const errorDiv = document.getElementById("errorMessage");
+    const errorDiv = document.getElementById("errorMessage");
 
-        // Bilder laden & überprüfen
-        function loadImage(src, name) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => resolve(img);
-                img.onerror = () => {
-                    console.error(`❌ Fehler: Bild '${name}' (${src}) konnte nicht geladen werden.`);
-                    showError(`Bild '${name}' konnte nicht geladen werden.`);
-                    reject(new Error(`Bild '${name}' konnte nicht geladen werden.`));
-                };
-            });
-        }
-
-        function showError(message) {
-            errorDiv.innerText = message;
-            errorDiv.style.display = "block";
-        }
-
-        async function loadAssets() {
-            try {
-                const marliImg = await loadImage("marli.png", "Marli");
-                const knightImg = await loadImage("knight.png", "Ritter");
-                const avocadoImg = await loadImage("Avocado.png", "Avocado");
-                const burritoImg = await loadImage("burrito.png", "Burrito");
-                const milkshakeImg = await loadImage("milkshake.png", "Milchshake");
-                const heartImg = await loadImage("heart.png", "Herz");
-
-                startGame(marliImg, knightImg, avocadoImg, burritoImg, milkshakeImg, heartImg);
-            } catch (error) {
-                console.log("Spiel konnte nicht gestartet werden. Fehlende Bilder.");
-            }
-        }
-
-        function startGame(marliImg, knightImg, avocadoImg, burritoImg, milkshakeImg, heartImg) {
-            let marli = {
-                x: 50, y: canvas.height - 120, width: 50, height: 70,
-                dy: 0, gravity: 0.6, jumpPower: -12, isJumping: false, speed: 5, lives: 3
+    function loadImage(src, name) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = () => {
+                console.error(`❌ Fehler: Bild '${name}' (${src}) konnte nicht geladen werden.`);
+                showError(`Bild '${name}' konnte nicht geladen werden.`);
+                reject(new Error(`Bild '${name}' konnte nicht geladen werden.`));
             };
+        });
+    }
 
-            const ground = { x: 0, y: canvas.height - 50, width: canvas.width, height: 50, color: "green" };
+    function showError(message) {
+        errorDiv.innerText = message;
+        errorDiv.style.display = "block";
+    }
 
-            let enemy = { x: canvas.width, y: ground.y - 60, width: 50, height: 60, speed: 5, active: true };
+    async function loadAssets() {
+        try {
+            const marliImg = await loadImage("marli.png", "Marli");
+            const knightImg = await loadImage("knight.png", "Ritter");
+            const avocadoImg = await loadImage("avocado.png", "Avocado");
+            const burritoImg = await loadImage("burrito.png", "Burrito");
+            const milkshakeImg = await loadImage("milkshake.png", "Milchshake");
+            const heartImg = await loadImage("heart.png", "Herz");
 
-            let foodItems = [];
-            const foodSprites = [avocadoImg, burritoImg, milkshakeImg];
+            startGame(marliImg, knightImg, avocadoImg, burritoImg, milkshakeImg, heartImg);
+        } catch (error) {
+            console.log("Spiel konnte nicht gestartet werden. Fehlende Bilder.");
+        }
+    }
 
-            function spawnFood() {
-                foodItems.push({
-                    x: canvas.width + Math.random() * 500,
-                    y: ground.y - 40,
-                    width: 40,
-                    height: 40,
-                    sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
-                });
+    function startGame(marliImg, knightImg, avocadoImg, burritoImg, milkshakeImg, heartImg) {
+        let marli = {
+            x: 50, y: canvas.height - 120, width: 50, height: 70,
+            dy: 0, gravity: 0.6, jumpPower: -12, isJumping: false, speed: 5, lives: 3
+        };
+
+        const ground = { x: 0, y: canvas.height - 50, width: canvas.width, height: 50, color: "green" };
+
+        let enemy = { x: canvas.width, y: ground.y - 60, width: 50, height: 60, speed: 5, active: true };
+
+        let foodItems = [];
+        const foodSprites = [avocadoImg, burritoImg, milkshakeImg];
+
+        let canBeHit = true;
+
+        function spawnFood() {
+            foodItems.push({
+                x: canvas.width + Math.random() * 500,
+                y: ground.y - 40,
+                width: 40,
+                height: 40,
+                sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
+            });
+        }
+
+        document.addEventListener("touchstart", () => {
+            if (!marli.isJumping) {
+                marli.dy = marli.jumpPower;
+                marli.isJumping = true;
+            }
+        });
+
+        function update() {
+            marli.dy += marli.gravity;
+            marli.y += marli.dy;
+
+            if (marli.y + marli.height >= ground.y) {
+                marli.y = ground.y - marli.height;
+                marli.isJumping = false;
             }
 
-            document.addEventListener("touchstart", () => {
-                if (!marli.isJumping) {
-                    marli.dy = marli.jumpPower;
-                    marli.isJumping = true;
+            // Gegner bewegen
+            if (enemy.active) {
+                enemy.x -= enemy.speed;
+                if (enemy.x + enemy.width < 0) {
+                    enemy.x = canvas.width + Math.random() * 500;
+                    canBeHit = true;
+                }
+            }
+
+            // Kollision mit Ritter
+            const hitRitter =
+                marli.x < enemy.x + enemy.width &&
+                marli.x + marli.width > enemy.x &&
+                marli.y < enemy.y + enemy.height &&
+                marli.y + marli.height > enemy.y;
+
+            if (enemy.active && hitRitter) {
+                if (marli.dy > 0) {
+                    enemy.active = false;
+                    setTimeout(() => {
+                        enemy.active = true;
+                        enemy.x = canvas.width + Math.random() * 500;
+                        canBeHit = true;
+                    }, 3000);
+                } else if (canBeHit) {
+                    marli.lives--;
+                    canBeHit = false;
+
+                    if (marli.lives <= 0) {
+                        alert("Game Over! Tippe, um neu zu starten.");
+                        marli.lives = 3;
+                        marli.speed = 5;
+                        enemy.x = canvas.width;
+                        canBeHit = true;
+                    }
+                }
+            }
+
+            // Essen bewegen und einsammeln
+            foodItems.forEach((food, index) => {
+                food.x -= marli.speed;
+                const collected =
+                    marli.x < food.x + food.width &&
+                    marli.x + marli.width > food.x &&
+                    marli.y < food.y + food.height &&
+                    marli.y + marli.height > food.y;
+
+                if (collected) {
+                    if (marli.lives < 3) {
+                        marli.lives++;
+                    }
+                    foodItems.splice(index, 1);
                 }
             });
 
-            function update() {
-                marli.dy += marli.gravity;
-                marli.y += marli.dy;
+            if (Math.random() < 0.005) spawnFood();
 
-                if (marli.y + marli.height >= ground.y) {
-                    marli.y = ground.y - marli.height;
-                    marli.isJumping = false;
-                }
-
-                if (enemy.active) {
-                    enemy.x -= enemy.speed;
-                    if (enemy.x + enemy.width < 0) {
-                        enemy.x = canvas.width + Math.random() * 500;
-                    }
-                }
-
-                if (
-                    marli.x < enemy.x + enemy.width &&
-                    marli.x + marli.width > enemy.x &&
-                    marli.y < enemy.y + enemy.height &&
-                    marli.y + marli.height > enemy.y
-                ) {
-                    if (marli.dy > 0) {
-                        enemy.active = false;
-                        setTimeout(() => { enemy.active = true; enemy.x = canvas.width + Math.random() * 500; }, 3000);
-                    } else {
-                        marli.lives--;
-                        if (marli.lives <= 0) {
-                            alert("Game Over! Tippe, um neu zu starten.");
-                            marli.lives = 3;
-                            marli.speed = 5;
-                            enemy.x = canvas.width;
-                        }
-                    }
-                }
-
-                foodItems.forEach((food, index) => {
-                    food.x -= marli.speed;
-                    if (
-                        marli.x < food.x + food.width &&
-                        marli.x + marli.width > food.x &&
-                        marli.y < food.y + food.height &&
-                        marli.y + marli.height > food.y
-                    ) {
-                        marli.lives = Math.min(marli.lives + 1, 3);
-                        foodItems.splice(index, 1);
-                    }
-                });
-
-                if (Math.random() < 0.005) spawnFood();
-
-                if (marli.speed < 12) marli.speed += 0.0005;
-            }
-
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = ground.color;
-                ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
-                ctx.drawImage(marliImg, marli.x, marli.y, marli.width, marli.height);
-
-                if (enemy.active) ctx.drawImage(knightImg, enemy.x, enemy.y, enemy.width, enemy.height);
-
-                foodItems.forEach(food => {
-                    ctx.drawImage(food.sprite, food.x, food.y, food.width, food.height);
-                });
-
-                for (let i = 0; i < marli.lives; i++) {
-                    ctx.drawImage(heartImg, 20 + i * 40, 20, 30, 30);
-                }
-            }
-
-            function gameLoop() {
-                update();
-                draw();
-                requestAnimationFrame(gameLoop);
-            }
-
-            gameLoop();
+            if (marli.speed < 12) marli.speed += 0.0005;
         }
 
-        loadAssets();
-    </script>
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = ground.color;
+            ctx.fillRect(ground.x, ground.y, ground.width, ground.height);
+            ctx.drawImage(marliImg, marli.x, marli.y, marli.width, marli.height);
+
+            if (enemy.active) {
+                ctx.drawImage(knightImg, enemy.x, enemy.y, enemy.width, enemy.height);
+            }
+
+            foodItems.forEach(food => {
+                ctx.drawImage(food.sprite, food.x, food.y, food.width, food.height);
+            });
+
+            for (let i = 0; i < marli.lives; i++) {
+                ctx.drawImage(heartImg, 20 + i * 40, 20, 30, 30);
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    }
+
+    loadAssets();
+</script>
 </body>
 </html>
