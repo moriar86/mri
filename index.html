@@ -45,8 +45,8 @@ function startGame() {
 
   let marli = {
     x: unit * 5,
-    width: unit * 10,
-    height: unit * 14, // kompakter
+    width: unit * 13,
+    height: unit * 17, // kompakter
     y: groundY - unit * 10,
     dy: 0,
     gravity: 0.6,
@@ -62,8 +62,8 @@ function startGame() {
     enemies.push({
       x: canvas.width + Math.random() * 300,
       y: groundY - unit * 9,
-      width: unit * 4,
-      height: unit * 4, // kompakter
+      width: unit * 2,
+      height: unit * 2, // kompakter
       speed: 5,
       active: true
     });
