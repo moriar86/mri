@@ -46,11 +46,11 @@ function startGame() {
   let marli = {
     x: unit * 5,
     width: unit * 10,
-    height: unit * 14,
-    y: groundY - unit * 14,
+    height: unit * 10, // kompakter
+    y: groundY - unit * 10,
     dy: 0,
     gravity: 0.6,
-    jumpPower: -12,
+    jumpPower: -20, // höherer Sprung
     isJumping: false,
     speed: 5,
     alive: true
@@ -61,9 +61,9 @@ function startGame() {
   function spawnEnemy() {
     enemies.push({
       x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 13,
+      y: groundY - unit * 9,
       width: unit * 9,
-      height: unit * 13,
+      height: unit * 9, // kompakter
       speed: 5,
       active: true
     });
@@ -134,9 +134,9 @@ function startGame() {
         ctx.drawImage(images.knight, enemy.x, enemy.y, enemy.width, enemy.height);
     });
 
-    // Herz-Anzeige (1 Leben)
+    // Herz-Anzeige
     if (marli.alive) {
-      ctx.drawImage(images.heart, unit * 2, unit * 2, unit * 4, unit * 4);
+      ctx.drawImage(images.heart, unit * 2, unit * 1.5, unit * 4, unit * 4);
     }
   }
 
