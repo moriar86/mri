@@ -5,17 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Marli Jump & Run</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background-color: #87ceeb;
-      touch-action: manipulation;
-    }
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-    }
+    body { margin: 0; overflow: hidden; background-color: #87ceeb; touch-action: manipulation; }
+    canvas { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
@@ -27,17 +18,12 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Einheit: 1% der Bildschirmhöhe
 const unit = canvas.height / 100;
 
-// Bildquellen
 const imageSources = {
   marli: "marli.png",
   knight: "knight.png",
-  heart: "heart.png",
-  avocado: "avocado.png",
-  burrito: "burrito.png",
-  milkshake: "milkshake.png"
+  heart: "heart.png"
 };
 
 const images = {};
@@ -66,12 +52,10 @@ function startGame() {
     jumpPower: -12,
     isJumping: false,
     speed: 5,
-    lives: 3
+    alive: true
   };
 
   const enemies = [];
-  const foods = [];
-  const foodSprites = [images.avocado, images.burrito, images.milkshake];
 
   function spawnEnemy() {
     enemies.push({
@@ -80,29 +64,20 @@ function startGame() {
       width: unit * 7,
       height: unit * 9,
       speed: 5,
-      canHit: true,
       active: true
     });
   }
 
-  function spawnFood() {
-    foods.push({
-      x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 5.5,
-      width: unit * 5.5,
-      height: unit * 5.5,
-      sprite: foodSprites[Math.floor(Math.random() * foodSprites.length)]
-    });
-  }
-
   document.addEventListener("touchstart", () => {
-    if (!marli.isJumping) {
+    if (marli.alive && !marli.isJumping) {
       marli.dy = marli.jumpPower;
       marli.isJumping = true;
     }
   });
 
   function update() {
+    if (!marli.alive) return;
+
     marli.dy += marli.gravity;
     marli.y += marli.dy;
 
@@ -127,35 +102,15 @@ function startGame() {
         marli.y + marli.height > enemy.y;
 
       if (hit) {
-        if (marli.dy > 0) {
-          enemy.active = false;
-        } else if (enemy.canHit) {
-          marli.lives--;
-          enemy.canHit = false;
-          if (marli.lives <= 0) {
-            alert("Game Over!");
-            resetGame();
-          }
-        }
-      }
-    });
-
-    foods.forEach((food, index) => {
-      food.x -= marli.speed;
-      const collected =
-        marli.x < food.x + food.width &&
-        marli.x + marli.width > food.x &&
-        marli.y < food.y + food.height &&
-        marli.y + marli.height > food.y;
-
-      if (collected) {
-        if (marli.lives < 3) marli.lives++;
-        foods.splice(index, 1);
+        marli.alive = false;
+        setTimeout(() => {
+          alert("Game Over!");
+          resetGame();
+        }, 100);
       }
     });
 
     if (Math.random() < 0.01) spawnEnemy();
-    if (Math.random() < 0.005) spawnFood();
 
     if (marli.speed < 12) marli.speed += 0.0005;
   }
@@ -166,27 +121,26 @@ function startGame() {
     ctx.fillStyle = "green";
     ctx.fillRect(0, groundY, canvas.width, unit * 5);
 
-    ctx.drawImage(images.marli, marli.x, marli.y, marli.width, marli.height);
+    if (marli.alive) {
+      ctx.drawImage(images.marli, marli.x, marli.y, marli.width, marli.height);
+    }
 
     enemies.forEach(enemy => {
       if (enemy.active)
         ctx.drawImage(images.knight, enemy.x, enemy.y, enemy.width, enemy.height);
     });
 
-    foods.forEach(food => {
-      ctx.drawImage(food.sprite, food.x, food.y, food.width, food.height);
-    });
-
-    for (let i = 0; i < marli.lives; i++) {
-      ctx.drawImage(images.heart, unit * 1 + i * (unit * 4), unit * 1, unit * 3, unit * 3);
+    if (marli.alive) {
+      ctx.drawImage(images.heart, unit * 2, unit * 2, unit * 4, unit * 4);
     }
   }
 
   function resetGame() {
-    marli.lives = 3;
+    marli.alive = true;
+    marli.y = groundY - marli.height;
+    marli.dy = 0;
     marli.speed = 5;
     enemies.length = 0;
-    foods.length = 0;
   }
 
   function gameLoop() {
