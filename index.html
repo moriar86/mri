@@ -40,13 +40,14 @@ for (let key in imageSources) {
 }
 
 function startGame() {
-  const groundY = canvas.height - unit * 5;
+  const groundHeight = unit * 5;
+  const groundY = canvas.height - groundHeight;
 
   let marli = {
     x: unit * 5,
-    y: groundY - unit * 11,
-    width: unit * 5,
-    height: unit * 7,
+    width: unit * 10,
+    height: unit * 14,
+    y: groundY - unit * 14,
     dy: 0,
     gravity: 0.6,
     jumpPower: -12,
@@ -60,16 +61,16 @@ function startGame() {
   function spawnEnemy() {
     enemies.push({
       x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 9,
-      width: unit * 5,
-      height: unit * 6,
+      y: groundY - unit * 13,
+      width: unit * 9,
+      height: unit * 13,
       speed: 5,
       active: true
     });
   }
 
   document.addEventListener("touchstart", () => {
-    if (marli.alive && !marli.isJumping) {
+    if (!marli.isJumping && marli.alive) {
       marli.dy = marli.jumpPower;
       marli.isJumping = true;
     }
@@ -118,18 +119,22 @@ function startGame() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Boden
     ctx.fillStyle = "green";
-    ctx.fillRect(0, groundY, canvas.width, unit * 5);
+    ctx.fillRect(0, groundY, canvas.width, groundHeight);
 
+    // Marli
     if (marli.alive) {
       ctx.drawImage(images.marli, marli.x, marli.y, marli.width, marli.height);
     }
 
+    // Ritter
     enemies.forEach(enemy => {
       if (enemy.active)
         ctx.drawImage(images.knight, enemy.x, enemy.y, enemy.width, enemy.height);
     });
 
+    // Herz-Anzeige (1 Leben)
     if (marli.alive) {
       ctx.drawImage(images.heart, unit * 2, unit * 2, unit * 4, unit * 4);
     }
