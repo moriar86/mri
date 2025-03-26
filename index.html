@@ -6,7 +6,7 @@
   <title>Marli Jump & Run</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #87ceeb; touch-action: manipulation; }
-    canvas { display: block; width: 100vw; height: 80vh; }
+    canvas { display: block; width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
@@ -23,7 +23,8 @@ const unit = canvas.height / 100;
 const imageSources = {
   marli: "marli.png",
   knight: "knight.png",
-  heart: "heart.png"
+  heart: "heart.png",
+  mountains: "mountains.png" // neuer Hintergrund
 };
 
 const images = {};
@@ -45,12 +46,12 @@ function startGame() {
 
   let marli = {
     x: unit * 5,
-    width: unit * 13,
-    height: unit * 17, // kompakter
-    y: groundY - unit * 5,
+    width: unit * 10,
+    height: unit * 10,
+    y: groundY - unit * 10,
     dy: 0,
     gravity: 0.6,
-    jumpPower: -20, // höherer Sprung
+    jumpPower: -20,
     isJumping: false,
     speed: 5,
     alive: true
@@ -58,12 +59,16 @@ function startGame() {
 
   const enemies = [];
 
+  // Hintergrund-Scroll
+  let backgroundX = 0;
+
   function spawnEnemy() {
+    const knightHeight = unit * 9;
     enemies.push({
       x: canvas.width + Math.random() * 300,
-      y: groundY - unit * 9,
-      width: unit * 4,
-      height: unit * 4, // kompakter
+      y: groundY - knightHeight,
+      width: unit * 9,
+      height: knightHeight,
       speed: 5,
       active: true
     });
@@ -85,6 +90,12 @@ function startGame() {
     if (marli.y + marli.height >= groundY) {
       marli.y = groundY - marli.height;
       marli.isJumping = false;
+    }
+
+    // Hintergrund scrollen
+    backgroundX -= 1;
+    if (backgroundX <= -canvas.width) {
+      backgroundX = 0;
     }
 
     enemies.forEach((enemy, index) => {
@@ -119,6 +130,10 @@ function startGame() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Hintergrund scrollend
+    ctx.drawImage(images.mountains, backgroundX, 0, canvas.width, canvas.height);
+    ctx.drawImage(images.mountains, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+
     // Boden
     ctx.fillStyle = "green";
     ctx.fillRect(0, groundY, canvas.width, groundHeight);
@@ -134,7 +149,7 @@ function startGame() {
         ctx.drawImage(images.knight, enemy.x, enemy.y, enemy.width, enemy.height);
     });
 
-    // Herz-Anzeige
+    // Herz
     if (marli.alive) {
       ctx.drawImage(images.heart, unit * 2, unit * 1.5, unit * 4, unit * 4);
     }
