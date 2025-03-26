@@ -24,7 +24,7 @@ const imageSources = {
   marli: "marli.png",
   knight: "knight.png",
   heart: "heart.png",
-  mountains: "mountains.png" // neuer Hintergrund
+  mountains: "mountains.png"
 };
 
 const images = {};
@@ -41,13 +41,14 @@ for (let key in imageSources) {
 }
 
 function startGame() {
+  // Boden etwas höher ansetzen
   const groundHeight = unit * 5;
-  const groundY = canvas.height - groundHeight;
+  const groundY = canvas.height * 0.65;
 
   let marli = {
     x: unit * 5,
     width: unit * 10,
-    height: unit * 10,
+    height: unit * 10, // Marli bleibt groß
     y: groundY - unit * 10,
     dy: 0,
     gravity: 0.6,
@@ -58,8 +59,6 @@ function startGame() {
   };
 
   const enemies = [];
-
-  // Hintergrund-Scroll
   let backgroundX = 0;
 
   function spawnEnemy() {
@@ -92,7 +91,6 @@ function startGame() {
       marli.isJumping = false;
     }
 
-    // Hintergrund scrollen
     backgroundX -= 1;
     if (backgroundX <= -canvas.width) {
       backgroundX = 0;
@@ -123,17 +121,16 @@ function startGame() {
     });
 
     if (Math.random() < 0.01) spawnEnemy();
-
     if (marli.speed < 12) marli.speed += 0.0005;
   }
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Hintergrund: scrollende Berge
     const bgHeight = canvas.height * 0.5;
-    
-    // Hintergrund scrollend
-ctx.drawImage(images.mountains, backgroundX, 0, canvas.width, bgHeight);
-ctx.drawImage(images.mountains, backgroundX + canvas.width, 0, canvas.width, bgHeight);
+    ctx.drawImage(images.mountains, backgroundX, 0, canvas.width, bgHeight);
+    ctx.drawImage(images.mountains, backgroundX + canvas.width, 0, canvas.width, bgHeight);
 
     // Boden
     ctx.fillStyle = "green";
